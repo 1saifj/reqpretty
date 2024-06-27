@@ -9,11 +9,16 @@ import (
 
 // readAndRestoreBody reads the request body and restores it for further processing.
 func readAndRestoreBody(body io.ReadCloser) ([]byte, error) {
+
+	if body == nil {
+		return nil, nil
+	}
+	defer body.Close()
 	buf, err := io.ReadAll(body)
 	if err != nil {
 		return nil, err
 	}
-	body = io.NopCloser(bytes.NewBuffer(buf))
+	_ = io.NopCloser(bytes.NewBuffer(buf)) // restore the body
 	return buf, nil
 }
 
