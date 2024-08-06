@@ -1,10 +1,7 @@
 # reqpretty
 
-    
-    [![Go Report Card](https://goreportcard.com/badge/github.com/1saif/reqpretty)](https://goreportcard.com/report/github.com/1saif/reqpretty)
-    [![Go Reference](https://pkg.go.dev/badge/github.com/1saif/reqpretty.svg)](https://pkg.go.dev/github.com/1saif/reqpretty)
-    [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
+![LOGO](https://i.imgur.com/4PxgK9B.png)
 
 `reqpretty` is a Go middleware package designed to beautify and log HTTP requests and responses in a structured and readable format. It provides detailed logging of request and response headers, bodies, query parameters, and more, with customization options to suit your needs.
 
