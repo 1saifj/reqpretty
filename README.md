@@ -1,7 +1,7 @@
 # reqpretty
 
 
-![LOGO](https://i.imgur.com/4PxgK9B.png)
+<img src="https://i.imgur.com/4PxgK9B.png" width="350" height="300">
 
 `reqpretty` is a Go middleware package designed to beautify and log HTTP requests and responses in a structured and readable format. It provides detailed logging of request and response headers, bodies, query parameters, and more, with customization options to suit your needs.
 
