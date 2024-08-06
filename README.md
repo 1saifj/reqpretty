@@ -1,85 +1,156 @@
+# reqpretty
 
-# reqpretty 💅
-
-Tired of plain, boring logs? Give your HTTP requests and responses a stylish makeover with `reqpretty`!
-
-[Image/GIF of a plain log transforming into a colorful, structured log with reqpretty]
-
-## Why reqpretty? ✨
-
-* **Eye Candy:** Beautiful ASCII borders and emojis (✅/❌) for instant status checks.
-* **Customizable:** Choose your colors, control the level of detail, and format the way you like it.
-* **Framework-Agnostic:** Works with all your favorite Go web frameworks. Just wrap and go!
-* **Structured Logging:** Powered by `slog` for efficient and insightful logging.
-
-## Get Started 🚀
-
-1. **Install:**
-
-   ```bash
-   go get github.com/1saifj/reqpretty
-   ```
-
-2. **Wrap & Log:**
-
-   ```go
-   import (
-       "github.com/1saifj/reqpretty"
-       "net/http"
-   )
     
-   func main() {
-       // Create a reqpretty handler 
-       http.Handle("/", reqpretty.DebugHandler(reqpretty.Options{}, yourHandler))
+    [![Go Report Card](https://goreportcard.com/badge/github.com/1saif/reqpretty)](https://goreportcard.com/report/github.com/1saif/reqpretty)
+    [![Go Reference](https://pkg.go.dev/badge/github.com/1saif/reqpretty.svg)](https://pkg.go.dev/github.com/1saif/reqpretty)
+    [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-       // ... (your other server setup)
-    }
-   ```
 
-## Configuration 🎨
+`reqpretty` is a Go middleware package designed to beautify and log HTTP requests and responses in a structured and readable format. It provides detailed logging of request and response headers, bodies, query parameters, and more, with customization options to suit your needs.
+
+## Features
+
+- **Request Logging**: Log HTTP method, URL, headers, query parameters, and body.
+- **Response Logging**: Log HTTP status code, headers, and body.
+- **Customization**: Configure what details to log, including request and response headers, bodies, and query parameters.
+- **Context Attributes**: Extract and log specific context attributes.
+- **Colorized Output**: Optionally colorize log output for better readability.
+
+## Installation
+
+To install the package, run:
+
+```sh
+go get github.com/1saif/reqpretty
+```
+
+## Usage
+
+Here's a simple example of how to use `reqpretty` in your Go application.
+
+### Setup Logger
+
+First, configure the logger:
 
 ```go
-reqpretty.Config(reqpretty.Options{
-    IncludeRequestHeaders:   true,
-    IncludeRequestBody:      true,
-    IncludeResponseHeaders:  true,
-    IncludeResponseBody:     true,
-    Colorer:                 &reqpretty.DefaultColorer{},
-    EnableColor:             true, // Or false to disable colors
-    SuccessEmoji: "✅", // Customize success emoji
-    ErrorEmoji:   "❌", // Customize error emoji
-})
+package main
+
+import (
+"log/slog"
+"github.com/yourusername/reqpretty"
+)
+
+func main() {
+logger := &reqpretty.Logger{}
+reqpretty.Configure(logger)
+// Your application code
+}
 ```
 
-## Example Output 📸
+### Middleware Example
 
+Next, use the `reqpretty` middleware in your HTTP server:
+
+```go
+package main
+
+import (
+"net/http"
+"github.com/yourusername/reqpretty"
+)
+
+func main() {
+opts := reqpretty.Options{
+IncludeRequest:            true,
+IncludeRequestHeaders:     true,
+IncludeRequestQueryParams: true,
+IncludeRequestBody:        true,
+IncludeResponse:           true,
+IncludeResponseHeaders:    true,
+IncludeResponseBody:       true,
+ContextAttributes:         []string{"request_id", "user_id"},
+}
+
+    mux := http.NewServeMux()
+    mux.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte("Hello, world!"))
+    })
+
+    loggedMux := reqpretty.DebugHandler(opts, mux)
+
+    http.ListenAndServe(":8080", loggedMux)
+}
 ```
-┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│  ⤴ REQUEST ⤴                                                                                                         │
-│                                                                                                                       │
-│ POST /api/users                                                                                                       │
-│ Content-Type: application/json                                                                                        │
-│                                                                                                                       │
-│   {                                                                                                                   │
-│     "name": "Alice"                                                                                                   │
-│   }                                                                                                                   │
-│                                                                                                                       │
-│ ✅ RESPONSE [200/OK] [Time elapsed: 123 ms]⤵                                                                         │  
-│                                                                                                                       │
-│ Content-Type: [application/json]                                                                                      │
-│                                                                                                                       │
-│   {                                                                                                                   │
-│     "message": "User created successfully"                                                                            │
-│   }                                                                                                                   │
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+## Configuration
+
+### Options
+
+The `Options` struct allows you to customize what details are logged:
+
+- **IncludeRequest**: Log the request details (default: `false`).
+- **IncludeRequestHeaders**: Log request headers (default: `false`).
+- **IncludeRequestQueryParams**: Log request query parameters (default: `false`).
+- **IncludeRequestBody**: Log request body (default: `false`).
+- **IncludeResponse**: Log the response details (default: `false`).
+- **IncludeResponseHeaders**: Log response headers (default: `false`).
+- **IncludeResponseBody**: Log response body (default: `false`).
+- **ContextAttributes**: List of context attributes to log (default: `nil`).
+
+### Logger
+
+The `Logger` struct is used to configure the logger:
+
+- **clone()**: Create a copy of the logger.
+
+## Example: Custom Logger
+
+You can customize the logger further by implementing your own `slog.Handler`:
+
+```go
+package main
+
+import (
+"context"
+"log/slog"
+"github.com/yourusername/reqpretty"
+)
+
+type CustomHandler struct {
+handler slog.Handler
+}
+
+func (h CustomHandler) Enabled(ctx context.Context, level slog.Level) bool {
+return h.handler.Enabled(ctx, level)
+}
+
+func (h CustomHandler) Handle(ctx context.Context, record slog.Record) error {
+// Custom log handling
+return h.handler.Handle(ctx, record)
+}
+
+func (h CustomHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+return CustomHandler{handler: h.handler.WithAttrs(attrs)}
+}
+
+func (h CustomHandler) WithGroup(name string) slog.Handler {
+return CustomHandler{handler: h.handler.WithGroup(name)}
+}
+
+func main() {
+logger := &reqpretty.Logger{}
+reqpretty.Configure(logger)
+customHandler := CustomHandler{handler: slog.Default().Handler()}
+slog.SetDefault(slog.New(customHandler))
+
+    // Your application code
+}
 ```
 
-## Make It Your Own 🛠️
+## Contributing
 
-* **Custom Colorer:** Create your own `Colorer` implementation for unique color schemes.
-* **Extend:** Contribute new features or formats – we welcome PRs!
+Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
 
-## License 📄
+## License
 
-MIT License - Go wild and be creative!
-
+This project is licensed under the MIT License.
