@@ -34,7 +34,7 @@ package main
 
 import (
 "log/slog"
-"github.com/yourusername/reqpretty"
+"github.com/1saifj/reqpretty"
 )
 
 func main() {
@@ -53,7 +53,7 @@ package main
 
 import (
 "net/http"
-"github.com/yourusername/reqpretty"
+"github.com/1saifj/reqpretty"
 )
 
 func main() {
@@ -110,7 +110,7 @@ package main
 import (
 "context"
 "log/slog"
-"github.com/yourusername/reqpretty"
+"github.com/1saifj/reqpretty"
 )
 
 type CustomHandler struct {
