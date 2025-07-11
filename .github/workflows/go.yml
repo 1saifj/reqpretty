@@ -35,6 +35,7 @@ jobs:
           echo "Go fmt issues found!"
           exit 1
         fi
+      shell: bash
 
     - name: Build
       run: go build -v ./...
