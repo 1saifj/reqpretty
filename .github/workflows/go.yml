@@ -1,41 +1,59 @@
-name: Go
+name: Go CI
 
 on:
   push:
-    branches: ["master", develop] # Include both branches
+    branches: [ "master", "develop" ]
   pull_request:
-    branches: ["master", develop] 
+    branches: [ "master", "develop" ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
     steps:
-      - uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21' # Latest stable version is recommended
+    - name: Check out code
+      uses: actions/checkout@v4
 
-      - name: Install Dependencies
-        run: go mod download
+    - name: Install Dependencies
+      run: go mod download
 
-      - name: Run go vet
-        run: go vet ./...
+    - name: Run go vet
+      run: go vet ./...
 
-      - name: Run go fmt (Check Formatting)
-        run: |
-          if [ -n "$(go fmt ./...)" ]; then
-            echo "Go fmt issues found!"
-            exit 1
-          fi
+    - name: Run go fmt (Check Formatting)
+      run: |
+        if [ -n "$(go fmt ./...)" ]; then
+          echo "Go fmt issues found!"
+          exit 1
+        fi
 
-      - name: Build
-        run: go build -v ./...
+    - name: Build
+      run: go build -v ./...
 
-      - name: Test
-        run: go test ./...
+    - name: Run unit tests
+      run: go test -v ./...
 
-      - name: Run race detector
-        if: github.event_name == 'push' # Only run race detector on push, not pull requests
-        run: go test -race -v ./...
+    - name: Run race detector (Linux only)
+      if: matrix.os == 'ubuntu-latest' && github.event_name == 'push'
+      run: go test -race -v ./...
+
+    - name: Run basic example
+      run: |
+        cd ./examples/basic
+        go mod tidy
+        go run .
+
+    - name: Run advanced example
+      run: |
+        cd ./examples/advanced
+        go mod tidy
+        go run .
