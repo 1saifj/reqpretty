@@ -26,6 +26,17 @@
 | 🔍 **Context Attributes** | Extract and log specific context attributes |
 | 🌈 **Colorized Output** | Optionally colorize log output for better readability |
 
+## 🤔 How It Works
+
+`reqpretty` works by providing an HTTP middleware (`DebugHandler`) that wraps your existing `http.Handler`. Here’s a step-by-step breakdown of the process:
+
+1.  **Wrap Handler**: The `DebugHandler` takes your handler and an `Options` struct as input.
+2.  **Intercept Request**: When a request comes in, the middleware intercepts it before it reaches your main handler.
+3.  **Capture Request Body**: It reads the request body into a buffer and then restores it, ensuring that your handler can still read the body as normal.
+4.  **Wrap ResponseWriter**: It uses a custom `http.ResponseWriter` to capture the status code and response body that your handler writes.
+5.  **Process Request**: It passes the request to your main handler for processing.
+6.  **Log Everything**: Once your handler has finished, the middleware logs the complete request and response details in a beautiful, box-style format based on the options you configured. The time taken to process the request is also calculated and logged.
+
 ## 🚀 Installation
 
 ```bash
@@ -175,6 +186,9 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ---
 
 <div align="center">
+
+Inspired by the [pretty_dio_logger](https://pub.dev/packages/pretty_dio_logger) for Dart.
+<br>
 
 **Made with ❤️ by the 1saifj**
 
