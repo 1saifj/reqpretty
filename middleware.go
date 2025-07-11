@@ -8,6 +8,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"runtime/debug"
 	"strings"
 	"time"
 )
@@ -30,12 +31,21 @@ func DebugHandler(opts Options, next http.Handler) http.Handler {
 		r.Body = io.NopCloser(bytes.NewBuffer(reqBody)) // Restore the body
 
 		rec := newRecorder(w)
+
+		defer func() {
+			duration := time.Since(startTime)
+
+			if rcv := recover(); rcv != nil {
+				logPanic(rcv)
+				rec.WriteHeader(http.StatusInternalServerError) // Write header to the actual response
+			}
+
+			// Always log the request and response
+			logRequest(r, reqBody, opts)
+			logResponse(rec, duration, opts)
+		}()
+
 		next.ServeHTTP(rec, r)
-
-		duration := time.Since(startTime)
-
-		logRequest(r, reqBody, opts)
-		logResponse(rec, duration, opts)
 	})
 }
 
@@ -281,6 +291,24 @@ func printEmptyLine() {
 func printBodyLine(line string) {
 	content := tabStep + line
 	printContentLine(content)
+}
+
+// logPanic prints panic details in a beautiful box.
+func logPanic(rcv interface{}) {
+	printTopLine()
+	printContentLine("💥 PANIC RECOVERED 💥")
+	printEmptyLine()
+	printWrappedContent(fmt.Sprintf("Error: %v", rcv))
+	printEmptyLine()
+	// Just a portion of the stack to avoid huge logs
+	stack := string(debug.Stack())
+	lines := strings.Split(stack, "\n")
+	if len(lines) > 15 {
+		lines = lines[:15]
+		lines = append(lines, "...")
+	}
+	printWrappedContent(fmt.Sprintf("Stack Trace (truncated):\n%s", strings.Join(lines, "\n")))
+	printBottomLine()
 }
 
 // printKV prints a key-value pair (legacy function)
