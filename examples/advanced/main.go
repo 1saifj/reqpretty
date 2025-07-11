@@ -1,13 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"time"
-
-	"bytes"
 
 	"github.com/1saifj/reqpretty"
 )
