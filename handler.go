@@ -11,12 +11,12 @@ type LogHandler struct {
 }
 
 // NewHandler creates a new LogHandler.
-func NewHandler(logger *Logger) LogHandler {
-	if logger == nil {
-		logger = Default
+func NewHandler(handler slog.Handler) LogHandler {
+	if handler == nil {
+		handler = slog.Default().Handler()
 	}
 	return LogHandler{
-		handler: logger,
+		handler: handler,
 	}
 }
 

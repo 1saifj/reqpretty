@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	reqpretty "github.com/1saifj/reqpretty/pkg/reqpretty"
 )
 
 type BufferLogger struct {
@@ -26,7 +28,7 @@ func (l *BufferLogger) String() string {
 }
 
 func TestDebugHandler(t *testing.T) {
-	opts := Options{
+	opts := reqpretty.Options{
 		IncludeRequest:            true,
 		IncludeRequestHeaders:     true,
 		IncludeRequestQueryParams: true,
@@ -44,7 +46,7 @@ func TestDebugHandler(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("Hello, world!"))
 		})
-		handler := DebugHandler(opts, nextHandler)
+		handler := reqpretty.DebugHandler(opts, nextHandler)
 
 		reqBody := []byte(`{"key":"value"}`)
 		req := httptest.NewRequest(http.MethodPost, "http://example.com/foo?bar=baz", bytes.NewReader(reqBody))
@@ -77,7 +79,7 @@ func TestDebugHandler(t *testing.T) {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Bad Request"))
 		})
-		handler := DebugHandler(opts, nextHandler)
+		handler := reqpretty.DebugHandler(opts, nextHandler)
 
 		reqBody := []byte(`{"key":"value"}`)
 		req := httptest.NewRequest(http.MethodPost, "http://example.com/foo?bar=baz", bytes.NewReader(reqBody))
@@ -110,7 +112,7 @@ func TestDebugHandler(t *testing.T) {
 		panicHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			panic("something went terribly wrong")
 		})
-		handler := DebugHandler(opts, panicHandler)
+		handler := reqpretty.DebugHandler(opts, panicHandler)
 
 		req := httptest.NewRequest(http.MethodGet, "http://example.com/panic", nil)
 		rec := httptest.NewRecorder()
@@ -135,7 +137,7 @@ func TestDebugHandler(t *testing.T) {
 			}
 			w.WriteHeader(http.StatusOK)
 		})
-		handler := DebugHandler(opts, nextHandler)
+		handler := reqpretty.DebugHandler(opts, nextHandler)
 
 		req := httptest.NewRequest(http.MethodPost, "http://example.com/no-body", nil) // No body provided
 		rec := httptest.NewRecorder()
@@ -154,7 +156,7 @@ func TestDebugHandler(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("OK"))
 		})
-		handler := DebugHandler(opts, nextHandler)
+		handler := reqpretty.DebugHandler(opts, nextHandler)
 
 		reqBody := []byte("this is plain text")
 		req := httptest.NewRequest(http.MethodPost, "http://example.com/text", bytes.NewReader(reqBody))
@@ -174,7 +176,7 @@ func TestDebugHandler(t *testing.T) {
 		nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
-		handler := DebugHandler(opts, nextHandler)
+		handler := reqpretty.DebugHandler(opts, nextHandler)
 
 		req := httptest.NewRequest(http.MethodGet, "http://example.com/multi-header", nil)
 		req.Header.Add("Accept", "application/json")
@@ -194,7 +196,7 @@ func TestDebugHandler(t *testing.T) {
 		nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNoContent) // No body should be written for 204
 		})
-		handler := DebugHandler(opts, nextHandler)
+		handler := reqpretty.DebugHandler(opts, nextHandler)
 
 		req := httptest.NewRequest(http.MethodGet, "http://example.com/no-content", nil)
 		rec := httptest.NewRecorder()
