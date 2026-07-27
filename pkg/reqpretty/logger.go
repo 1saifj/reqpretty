@@ -96,9 +96,9 @@ func printResponseHeader(rec *responseWriter, duration time.Duration, opts Optio
 	}
 
 	status := fmt.Sprintf("%d %s", rec.statusCode, http.StatusText(rec.statusCode))
-	timeStr := duration.String()
+	timeStr := fmt.Sprintf("%v", duration)
 
-	header := fmt.Sprintf("%s Response - Status: %s - Time: %s", statusEmoji, status, timeStr)
+	header := fmt.Sprintf("%s Response [Status: %s, Time: %s]", statusEmoji, status, timeStr)
 	opts.Printer.PrintBox(header, "", statusColor)
 }
 
